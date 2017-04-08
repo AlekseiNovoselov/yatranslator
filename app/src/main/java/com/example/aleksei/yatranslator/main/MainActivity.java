@@ -1,4 +1,4 @@
-package com.example.aleksei.yatranslator;
+package com.example.aleksei.yatranslator.main;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -7,10 +7,15 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 
+import com.example.aleksei.yatranslator.Injection;
+import com.example.aleksei.yatranslator.note.NoteFragment;
+import com.example.aleksei.yatranslator.R;
+import com.example.aleksei.yatranslator.settings.SettingsFragment;
 import com.example.aleksei.yatranslator.utils.ActivityUtils;
 
 public class MainActivity extends AppCompatActivity {
 
+    private MainPresenter mMainPresenter;
     private ActivityUtils.Screen currentScreen;
 
     private BottomNavigationView.OnNavigationItemSelectedListener mOnNavigationItemSelectedListener
@@ -24,6 +29,7 @@ public class MainActivity extends AppCompatActivity {
                 case R.id.navigation_translate:
                     nextScreen = ActivityUtils.Screen.MAIN;
                     nextFragment = MainFragment.newInstance();
+                    mMainPresenter = new MainPresenter(Injection.provideRepository(getApplicationContext()), (MainContract.View) nextFragment);
                     break;
                 case R.id.navigation_note:
                     nextScreen = ActivityUtils.Screen.NOTE;
@@ -55,13 +61,28 @@ public class MainActivity extends AppCompatActivity {
         BottomNavigationView navigation = (BottomNavigationView) findViewById(R.id.navigation);
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
 
-        Fragment fragment = getSupportFragmentManager().findFragmentById(R.id.contentFrame);
-        if (fragment == null) {
+        MainFragment mainFragment =
+                (MainFragment) getSupportFragmentManager().findFragmentById(R.id.contentFrame);
 
+        if (mainFragment == null) {
             currentScreen = ActivityUtils.Screen.MAIN;
+            mainFragment = MainFragment.newInstance();
             ActivityUtils.addFragmentToActivity(
-                    getSupportFragmentManager(), MainFragment.newInstance(), R.id.contentFrame, ActivityUtils.AnimationSide.NONE);
+                    getSupportFragmentManager(), mainFragment, R.id.contentFrame, ActivityUtils.AnimationSide.NONE);
         }
+
+        mMainPresenter = new MainPresenter(Injection.provideRepository(getApplicationContext()), mainFragment);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mMainPresenter.onStart(getBaseContext());
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mMainPresenter.onStop(getBaseContext());
+    }
 }

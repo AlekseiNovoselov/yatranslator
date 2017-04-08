@@ -63,6 +63,11 @@ dependencies {
     compile "com.android.support:support-vector-drawable:$rootProject.supportLibraryVersion"
     compile "com.android.support.constraint:constraint-layout:$rootProject.constraintLayoutVersion"
 
+    // Network
+    compile "com.squareup.okhttp3:okhttp:$rootProject.okHttpVersion"
+    compile "com.facebook.stetho:stetho:$rootProject.stethoVersion"
+    // OkHttp 3.x
+    compile "com.facebook.stetho:stetho-okhttp3:$rootProject.stethoVersion"
 
     // Dependencies for local unit tests
     testCompile "junit:junit:$rootProject.ext.junitVersion"

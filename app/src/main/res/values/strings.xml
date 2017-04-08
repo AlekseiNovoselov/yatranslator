@@ -1,4 +1,7 @@
 <resources>
+
+    <string name="url_root">https://translate.yandex.net/</string>
+
     <string name="app_name">yatranslator</string>
     <string name="title_home">Translate</string>
     <string name="title_notes">Notes</string>

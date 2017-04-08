@@ -30,6 +30,9 @@ ext {
     compileSdkVersion = 25
     buildToolsVersion = '25.0.0'
 
+    okHttpVersion = '3.6.0'
+    stethoVersion = '1.4.2'
+
     // App dependencies
     supportLibraryVersion = '25.3.1'
     constraintLayoutVersion = '1.0.1'
