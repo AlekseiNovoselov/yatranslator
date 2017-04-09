@@ -6,9 +6,9 @@ import android.os.ResultReceiver;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import com.example.aleksei.yatranslator.data.Task;
 import com.example.aleksei.yatranslator.data.network.Response;
 import com.example.aleksei.yatranslator.data.network.TranslatorNetworkService;
-import com.example.aleksei.yatranslator.data.network.TranslationResult;
 import com.example.aleksei.yatranslator.data.network.processor.ErrorMessage;
 import com.example.aleksei.yatranslator.data.network.processor.Processor;
 import com.example.aleksei.yatranslator.data.network.processor.TranslateProcessor;
@@ -69,19 +69,19 @@ public class TranslateResultListener implements Processor.OnProcessorResultListe
 
     @Nullable
     private Bundle handleResultOk(@NonNull Response response) {
-        TranslationResult traslationResult =
-                (TranslationResult) response.getData().get(TranslateProcessor.KEY_TRANSLATION_RESULT);
+        Task task =
+                (Task) response.getData().get(TranslateProcessor.KEY_TRANSLATION_RESULT);
 
-        if (traslationResult == null)
+        if (task == null)
             return null;
 
         Bundle result = new Bundle();
-        result.putString(TranslatorNetworkService.EXTRA_TEXT, traslationResult.getResult());
-//        result.putString(BughouseNetworkService.EXTRA_USERNAME, authenticationResult.getUsername());
-//        result.putString(BughouseNetworkService.EXTRA_SESSION_ID, authenticationResult.getSessionId());
-//        result.putString(BughouseNetworkService.EXTRA_USER_ID, authenticationResult.getUserId());
-//        result.putString(BughouseNetworkService.EXTRA_USER_SCORE, authenticationResult.getScore());
-//        result.putString(BughouseNetworkService.EXTRA_USER_PHOTO_URI, authenticationResult.getPhotoUri());
+        result.putString(TranslatorNetworkService.EXTRA_SOURCE_TEXT, task.getSourceText());
+        result.putString(TranslatorNetworkService.EXTRA_ENTITY_ID, task.getId());
+        result.putString(TranslatorNetworkService.EXTRA_SOURCE_TEXT, task.getSourceText());
+        result.putString(TranslatorNetworkService.EXTRA_RESULT_TEXT, task.getResultText());
+        result.putString(TranslatorNetworkService.EXTRA_SOURCE_LANG, task.getSourceLang());
+        result.putString(TranslatorNetworkService.EXTRA_RESULT_LANG, task.getResultLang());
         result.putParcelable(TranslatorNetworkService.EXTRA_ORIGINAL_INTENT, mOriginalRequestIntent);
         return result;
     }

@@ -2,11 +2,13 @@ package com.example.aleksei.yatranslator.data;
 
 public interface DataSource {
 
-    long getTranslation(Task task, LoadTranslationCallback loadTranslationCallback);
+    long getTranslation(Task task, Repository.RemoteLoadListener loadTranslationCallback);
+
+    void saveTask(Task task);
 
     interface LoadTranslationCallback {
 
-        void onLoaded(String text);
+        void onLoaded(Task task);
 
         void onDataNotAvailable();
     }

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 
 import com.example.aleksei.yatranslator.data.DataSource;
+import com.example.aleksei.yatranslator.data.Repository;
 import com.example.aleksei.yatranslator.data.Task;
 
 public class RemoteDataSource implements DataSource {
@@ -23,7 +24,12 @@ public class RemoteDataSource implements DataSource {
         return INSTANCE;
     }
 
-    public long getTranslation(Task task, @NonNull final DataSource.LoadTranslationCallback callback) {
-        return ServiceHelper.get(mContext).translate(task);
+    public long getTranslation(Task task, @NonNull Repository.RemoteLoadListener callback) {
+        return ServiceHelper.get(mContext).translate(task, callback);
+    }
+
+    @Override
+    public void saveTask(Task task) {
+
     }
 }

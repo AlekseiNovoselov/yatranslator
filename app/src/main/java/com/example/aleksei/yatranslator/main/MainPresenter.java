@@ -7,7 +7,6 @@ import android.content.IntentFilter;
 import android.support.annotation.NonNull;
 import android.support.v4.content.LocalBroadcastManager;
 
-import com.example.aleksei.yatranslator.data.DataSource;
 import com.example.aleksei.yatranslator.data.Repository;
 import com.example.aleksei.yatranslator.data.Task;
 import com.example.aleksei.yatranslator.data.network.Response;
@@ -17,10 +16,11 @@ import com.example.aleksei.yatranslator.data.network.TranslatorNetworkService;
 public class MainPresenter implements MainContract.Presenter {
 
     private BroadcastReceiver mTranslationCompletedReceiver = new TranslationCompletedReceiver();
-    private long mAuthenticationRequestId;
+    private long mTranslationRequestId;
 
     private final Repository mRepository;
     private final MainContract.View mMainView;
+    private Task lastTask;
 
     public MainPresenter(@NonNull Repository repository, @NonNull MainContract.View mainView) {
         mRepository = repository;
@@ -35,17 +35,8 @@ public class MainPresenter implements MainContract.Presenter {
 
     @Override
     public void translate(CharSequence text) {
-        mAuthenticationRequestId = mRepository.getTranslation(new Task(String.valueOf(text)), new DataSource.LoadTranslationCallback() {
-            @Override
-            public void onLoaded(String text) {
-
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-
-            }
-        });
+        Task task = new Task(String.valueOf(text), "en", "ru");
+        mTranslationRequestId = mRepository.getTranslation(task);
     }
 
     public void onStart(Context context) {
@@ -65,7 +56,7 @@ public class MainPresenter implements MainContract.Presenter {
         public void onReceive(Context context, Intent intent) {
             final long requestId = intent.getLongExtra(TranslatorNetworkService.EXTRA_REQUEST_ID, 0);
             final int status = intent.getIntExtra(TranslatorNetworkService.EXTRA_RESULT_CODE, 0);
-            if (mAuthenticationRequestId == requestId) {
+            if (mTranslationRequestId == requestId) {
                 switch (status) {
                     case Response.RESULT_OK:
                         handleResultOk(context, intent);
@@ -88,7 +79,12 @@ public class MainPresenter implements MainContract.Presenter {
     }
 
     private void handleResultOk(Context context, Intent intent) {
-        String resultText = intent.getStringExtra(TranslatorNetworkService.EXTRA_TRANSLATION_RESULT);
+        final String id = intent.getStringExtra(TranslatorNetworkService.EXTRA_ENTITY_ID);
+        final String sourceText = intent.getStringExtra(TranslatorNetworkService.EXTRA_SOURCE_TEXT);
+        final String resultText = intent.getStringExtra(TranslatorNetworkService.EXTRA_RESULT_TEXT);
+        final String sourceLang = intent.getStringExtra(TranslatorNetworkService.EXTRA_SOURCE_LANG);
+        final String resultLang = intent.getStringExtra(TranslatorNetworkService.EXTRA_RESULT_LANG);
+        lastTask = new Task(id, sourceText, resultText, sourceLang, resultLang);
         mMainView.setResult(resultText);
     }
 

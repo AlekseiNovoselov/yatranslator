@@ -8,6 +8,7 @@ import android.os.ResultReceiver;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
+import com.example.aleksei.yatranslator.data.Repository;
 import com.example.aleksei.yatranslator.data.Task;
 
 import java.util.HashMap;
@@ -35,14 +36,14 @@ public class ServiceHelper {
         return instance;
     }
 
-    public long translate(Task task) {
+    public long translate(Task task, Repository.RemoteLoadListener callback) {
         long requestId;
         if (mPendingRequests.containsKey(TRANSLATE)) {
             requestId = mPendingRequests.get(TRANSLATE);
         } else {
             requestId = mRequestIdGenerator.incrementAndGet();
             mPendingRequests.put(TRANSLATE, requestId);
-            ResultReceiver serviceCallback = new TranslationReceiver(null, TRANSLATE);
+            ResultReceiver serviceCallback = new TranslationReceiver(null, TRANSLATE, callback);
             TranslatorNetworkService.startTranslationService(mContext, serviceCallback, requestId, task);
         }
         return requestId;
@@ -51,6 +52,7 @@ public class ServiceHelper {
     private class TranslationReceiver extends ResultReceiver {
 
         private final String mResource;
+        private final Repository.RemoteLoadListener mCallback;
 
         /**
          * Create a new ResultReceive to receive results.  Your
@@ -59,9 +61,10 @@ public class ServiceHelper {
          *
          * @param handler
          */
-        public TranslationReceiver(Handler handler, String resource) {
+        public TranslationReceiver(Handler handler, String resource, Repository.RemoteLoadListener callback) {
             super(handler);
             mResource = resource;
+            mCallback = callback;
         }
 
         @Override
@@ -74,10 +77,23 @@ public class ServiceHelper {
 
                 switch (resultCode) {
                     case Response.RESULT_OK:
-                        String translateResult = resultData.getString(TranslatorNetworkService.EXTRA_TEXT);
+
+                        final String id = resultData.getString(TranslatorNetworkService.EXTRA_ENTITY_ID);
+                        final String sourceText = resultData.getString(TranslatorNetworkService.EXTRA_SOURCE_TEXT);
+                        final String resultText = resultData.getString(TranslatorNetworkService.EXTRA_RESULT_TEXT);
+                        final String sourceLang = resultData.getString(TranslatorNetworkService.EXTRA_SOURCE_LANG);
+                        final String resultLang = resultData.getString(TranslatorNetworkService.EXTRA_RESULT_LANG);
+
                         result.putExtra(TranslatorNetworkService.EXTRA_REQUEST_ID, requestId);
                         result.putExtra(TranslatorNetworkService.EXTRA_RESULT_CODE, resultCode);
-                        result.putExtra(TranslatorNetworkService.EXTRA_TRANSLATION_RESULT, translateResult);
+
+                        result.putExtra(TranslatorNetworkService.EXTRA_ENTITY_ID, id);
+                        result.putExtra(TranslatorNetworkService.EXTRA_SOURCE_TEXT, sourceText);
+                        result.putExtra(TranslatorNetworkService.EXTRA_RESULT_TEXT, resultText);
+                        result.putExtra(TranslatorNetworkService.EXTRA_SOURCE_LANG, sourceLang);
+                        result.putExtra(TranslatorNetworkService.EXTRA_RESULT_LANG, resultLang);
+
+                        mCallback.onLoaded(new Task(id, sourceText, resultText, sourceLang, resultLang));
                         break;
                     case Response.RESULT_UNEXPECTED_ERROR:
                         break;
@@ -85,7 +101,6 @@ public class ServiceHelper {
                     default:
                         break;
                 }
-
                 mPendingRequests.remove(mResource);
                 LocalBroadcastManager.getInstance(mContext).sendBroadcast(result);
             }

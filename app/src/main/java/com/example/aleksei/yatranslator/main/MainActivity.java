@@ -73,16 +73,4 @@ public class MainActivity extends AppCompatActivity {
 
         mMainPresenter = new MainPresenter(Injection.provideRepository(getApplicationContext()), mainFragment);
     }
-
-    @Override
-    protected void onStart() {
-        super.onStart();
-        mMainPresenter.onStart(getBaseContext());
-    }
-
-    @Override
-    protected void onStop() {
-        super.onStop();
-        mMainPresenter.onStop(getBaseContext());
-    }
 }

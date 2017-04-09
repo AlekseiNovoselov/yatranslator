@@ -17,6 +17,7 @@ import org.w3c.dom.Text;
 
 public class MainFragment extends Fragment implements MainContract.View {
 
+    private static final String LAST_TRANSLATE = "LAST_TRANSLATE";
     private MainContract.Presenter mPresenter;
 
     private TextView mResultText;
@@ -71,4 +72,17 @@ public class MainFragment extends Fragment implements MainContract.View {
     public void setPresenter(MainContract.Presenter presenter) {
         mPresenter = presenter;
     }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mPresenter.onStart(getContext());
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        mPresenter.onStop(getContext());
+    }
+
 }

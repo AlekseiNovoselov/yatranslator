@@ -30,21 +30,24 @@ public class Repository {
         return INSTANCE;
     }
 
-    public long getTranslation(Task task, @NonNull final DataSource.LoadTranslationCallback callback) {
-        return getTasksFromRemoteDataSource(task, callback);
+    public long getTranslation(Task task) {
+        return getTasksFromRemoteDataSource(task);
     }
 
-    private long getTasksFromRemoteDataSource(Task task, @NonNull final DataSource.LoadTranslationCallback callback) {
-        return mRemoteDataSource.getTranslation(task, new DataSource.LoadTranslationCallback() {
+    private long getTasksFromRemoteDataSource(Task task) {
+        return mRemoteDataSource.getTranslation(task, new RemoteLoadListener() {
             @Override
-            public void onLoaded(String text) {
-                callback.onLoaded(text);
-            }
-
-            @Override
-            public void onDataNotAvailable() {
-                callback.onDataNotAvailable();
+            public void onLoaded(Task task) {
+                refreshLocalDataSource(task);
             }
         });
+    }
+
+    private void refreshLocalDataSource(Task task) {
+        mLocalDataSource.saveTask(task);
+    }
+
+    public interface RemoteLoadListener {
+        void onLoaded(Task task);
     }
 }

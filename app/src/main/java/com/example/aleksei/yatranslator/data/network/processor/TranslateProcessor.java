@@ -2,11 +2,13 @@ package com.example.aleksei.yatranslator.data.network.processor;
 
 import android.content.Context;
 
+import com.example.aleksei.yatranslator.data.Task;
 import com.example.aleksei.yatranslator.data.network.Request;
 import com.example.aleksei.yatranslator.data.network.Resource;
 import com.example.aleksei.yatranslator.data.network.Response;
-import com.example.aleksei.yatranslator.data.network.TranslationResult;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
@@ -15,11 +17,11 @@ import java.util.Map;
 public class TranslateProcessor extends Processor {
 
     public static final String KEY_TRANSLATION_RESULT = "KEY_TRANSLATION_RESULT";
-    private String mText;
+    private Task mTask;
 
-    public TranslateProcessor(Context context, Processor.OnProcessorResultListener listener, String text) {
+    public TranslateProcessor(Context context, Processor.OnProcessorResultListener listener, Task task) {
         super(context, listener);
-        mText = text;
+        mTask = task;
     }
 
     @Override
@@ -30,7 +32,9 @@ public class TranslateProcessor extends Processor {
         String message;
         switch (status) {
             case Response.RESULT_OK:
-                result = TranslationResult.fromJSONObject(responseJSONObject);
+                String resultText = fromJSONObject(responseJSONObject);
+                mTask.setResultText(resultText);
+                result = mTask;
                 break;
             case Response.RESULT_CANNOT_SEND_MESSAGE:
                 message = "Cannot send auth message";
@@ -54,8 +58,8 @@ public class TranslateProcessor extends Processor {
     protected Request prepareRequest() {
         Map<String, String> params = new HashMap<>();
         params.put("key", "trnsl.1.1.20170408T190248Z.75ab9656097b1b4f.7c9f6b9f5472ceb5e978f9cfbe34d492fdce8625");
-        params.put("text", mText);
-        params.put("lang", "en-ru");
+        params.put("text", mTask.getSourceText());
+        params.put("lang", mTask.getSourceLang() + "-" + mTask.getResultLang());
         params.put("format", "html");
         String path = "api/v1.5/tr.json/translate";
         return new Request(mContext, path, Request.RequestMethod.POST, params);
@@ -69,5 +73,15 @@ public class TranslateProcessor extends Processor {
     @Override
     protected void updateDataAfterExecutingRequest(Response response) {
 
+    }
+
+    public String fromJSONObject(JSONObject responseJSONObject) {
+        try {
+            JSONArray array = responseJSONObject.getJSONArray("text");
+            return (String) array.get(0);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 }
