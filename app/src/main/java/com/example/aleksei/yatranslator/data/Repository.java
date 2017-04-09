@@ -47,6 +47,10 @@ public class Repository {
         mLocalDataSource.saveTask(task);
     }
 
+    public void getHistory(DataSource.LoadTranslationCallback callback) {
+        mLocalDataSource.getHistory(callback);
+    }
+
     public interface RemoteLoadListener {
         void onLoaded(Task task);
     }

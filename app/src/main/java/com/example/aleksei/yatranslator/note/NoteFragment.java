@@ -11,7 +11,10 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.example.aleksei.yatranslator.Injection;
 import com.example.aleksei.yatranslator.R;
+import com.example.aleksei.yatranslator.note.history.HistoryFragment;
+import com.example.aleksei.yatranslator.note.history.HistoryPresenter;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +49,11 @@ public class NoteFragment extends Fragment {
     private void setupViewPager(ViewPager viewPager) {
         ViewPagerAdapter adapter = new ViewPagerAdapter(this.getChildFragmentManager());
         viewPager.setAdapter(adapter);
-        adapter.addFragment(new BaseFragment(), "История");
+
+        HistoryFragment historyFragment = HistoryFragment.newInstance();
+        adapter.addFragment(historyFragment, "История");
+        new HistoryPresenter(Injection.provideRepository(getContext()), historyFragment);
+
         adapter.addFragment(new BaseFragment(), "Избранное");
         adapter.notifyDataSetChanged();
     }

@@ -32,4 +32,9 @@ public class RemoteDataSource implements DataSource {
     public void saveTask(Task task) {
 
     }
+
+    @Override
+    public void getHistory(LoadTranslationCallback callback) {
+
+    }
 }
